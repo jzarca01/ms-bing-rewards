@@ -20,6 +20,7 @@ program
   .option('-e, --email [value]', 'Specify your email address')
   .option('-l --list [file]', 'Specify a file')
   .option('-p, --password [value]', 'Specify the associated password')
+  .option('--mobile', "Only mobile searches")
   .parse(process.argv);
 
 if((!program.email || !program.list) && !program.password ) {
@@ -32,12 +33,16 @@ if(ERRORS.length > 0) {
     return;    
 }
 
+if(program.mobile) {
+    program.mobile = true;
+}
+
 if(program.list) {
     fs.readFile(program.list, function(err, data) {
         if(err) throw err;
 
         const makeRequest = async(account) => {
-            await rewardsApi.getRewards(account, program.password);
+            await rewardsApi.getRewards(account, program.password, program.mobile);
         }
 
         const accounts = fs.readFileSync(program.list).toString().split("\n");
@@ -49,7 +54,7 @@ if(program.list) {
 }
 
 else {
-    rewardsApi.getRewards(program.email, program.password)
+    rewardsApi.getRewards(program.email, program.password, program.mobile)
     .catch(error => {
         console.log("An error occured");
         return;
